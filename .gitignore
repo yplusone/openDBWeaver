@@ -1,0 +1,38 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Local env / secrets
+.env
+.env.*
+
+# Generated outputs (see README)
+# output/
+output/hits/gemini_3_flash
+
+# Local DuckDB database files
+*.duckdb
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local backup with real paths / keys (tracked config.py uses env vars)
+config copy.py
+config.py
+extension-template/build/
