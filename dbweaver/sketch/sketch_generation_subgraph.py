@@ -116,13 +116,7 @@ class SketchGenerationSubgraph:
         sub.add_edge(prev, END)
         
         compiled_sub = sub.compile()
-        if self.draw_workflow:
-            try:
-                png_bytes = compiled_sub.get_graph().draw_mermaid_png()
-                with open("plan.png", "wb") as f:
-                    f.write(png_bytes)
-            except Exception:
-                pass
+
         
         out_state = compiled_sub.invoke(state)
         return out_state
