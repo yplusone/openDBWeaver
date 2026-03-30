@@ -2,24 +2,6 @@
 
 An experimental pipeline for **custom query execution in DuckDB (C++)**: large language models generate sketch code from SQL workloads, you compile and validate it in Docker, then iteratively improve performance with **tree search and hint-guided optimization**.
 
-## Features
-
-- **Sketch generation**: A `LangGraph` subgraph chains **plan → per-operator codegen → merge** and emits single-file C++ sources that implement the query execution (see `template/` and `dbweaver/sketch/`).
-- **Automatic fix**: Iteratively calls an LLM on compile failures, result mismatches, and similar issues; supports patch vs full-replacement style outputs (`dbweaver/optimize/fix_agent.py`).
-- **Hint-guided optimization**: After validation passes, explores rewrites with a search tree and records traces and performance (`dbweaver/optimize/graph.py`, etc.).
-- **Execution and validation**: `CodeChecker` uses `DockerDuckDBRunner` / `DuckDBConnector` for builds, query runs, and result comparison (`dbweaver/env/`).
-
-## Repository layout (selected)
-
-| Path | Description |
-|------|-------------|
-| `config.py` | Global paths, benchmark name, LLM settings, output dirs (configure locally; do not commit secrets) |
-| `dbweaver/sketch/` | Sketch generation, operator codegen, `GatherContext` |
-| `dbweaver/optimize/` | Optimization graph, candidate chains, scoring, `fix_agent` |
-| `dbweaver/env/` | Docker builds, DuckDB execution, result comparison |
-| `benchmark/` | Workloads (e.g. `hits_queries.sql`, `ssb_benchmark`) and query loaders |
-| `scripts/` | Runnable entry-point scripts |
-| `output/` | Generated artifacts (sketches, fixed code, optimized code, traces, etc.; paths come from `config.py`) |
 
 ## Requirements
 
@@ -28,19 +10,28 @@ An experimental pipeline for **custom query execution in DuckDB (C++)**: large l
 - A local **DuckDB database file** (`.duckdb`) and paths to your **DuckDB / build tree** used to compile the execution code, aligned with `DB_PATH`, `DEFAULT_SOURCE_DIR`, `DUCKDB_BINARY_PATH`, etc. in `config.py`
 - A reachable **OpenAI-compatible API** (via `langchain-openai`) for sketch, fix, and optimization stages
 
-## Docker establish
-```
+## Docker Setup
+
+A `Dockerfile` is already provided in this repository, so you only need to build the image and run the container to compile the project.
+
+### 1. Build the Docker image
+
+```bash
 docker build \
   --network=host \
   --build-arg GIT_HTTP_PROXY=http://127.0.0.1:31328 \
   --build-arg GIT_HTTPS_PROXY=http://127.0.0.1:31328 \
   -t dbweaver_duckdb:latest .
 ```
+This command builds the Docker image dbweaver_duckdb:latest using the provided Dockerfile.
 
-Optional: You can make through docker keep environment clean
+If your environment does not require a proxy, you can remove the two --build-arg options.
+
+### 2.Build the project inside the container
+
 ```
 docker run --rm   \
-    -v "/home/yjn/duckdb_docker/extension-template/:/app"   \
+    -v "extension-template/:/app"   \
     -w /app   \
     --network=host   \
     -e BUILD_TYPE=release   \
@@ -49,9 +40,11 @@ docker run --rm   \
     bash -lc 'rm -rf /app/build/release && make release'
 ```
 
-## Installing dependencies
+## Database Download
+For ClickBench, Follow the instruction in https://github.com/ClickHouse/ClickBench
+For SSB, Follow the instruction in https://clickhouse.com/docs/getting-started/example-datasets/star-schema
 
-There is no bundled `requirements.txt`; install from imports as needed, for example:
+## Installing dependencies
 
 ```bash
 pip install httpx langgraph langchain-core langchain-openai \
@@ -62,13 +55,16 @@ Run scripts from the repository root so `import config` and `dbweaver` resolve c
 
 ## Configuration
 
-Copy and edit `config.py` (or keep a private local copy) and verify at least:
+Copy and edit `config_example.py` as `config.py` and verify at least:
 
-- **Benchmark**: `BENCHMARK` (e.g. `hits` / `ssb`) and that the matching `*_database.json` under `benchmark/profiles/` exists.
-- **Data and binaries**: `DB_PATH`, `DUCKDB_BINARY_PATH`, `DEFAULT_SOURCE_DIR`, `DOCKER_IMAGE`, `THREADS`.
-- **Output directories**: `GENERATED_CODE_DIR`, `SKETCH_DIR`, `SKETCH_FIX_DIR`, `OPTIMIZED_CODE_DIR`, `TRACE_DIR`.
+- **Benchmark**: `BENCHMARK` (e.g. `hits` / `ssb`)
+- **Data and binaries**: `DB_PATH`, `DUCKDB_BINARY_PATH`, `DEFAULT_SOURCE_DIR`, `DOCKER_IMAGE`.
+- **Output directories**: `GENERATED_CODE_DIR`.
 - **LLM**: `API_KEY`, `BASE_URL`, per-stage `*_MODEL`, etc. **Do not commit real API keys.**
-- **Networking**: If you use a proxy, configure `httpx` `proxy` and environment variables to match your setup.
+```
+export DBWEAVER_API_KEY="your key"
+export DBWEAVER_BASE_URL="https://api.openai.com/v1"
+```
 
 ## Typical usage
 
@@ -85,10 +81,9 @@ The script iterates over the configured `query_id` values and writes outputs und
 ### 2. Compile / result fix
 
 ```bash
-python dbweaver/optimize/fix_agent.py
+python scripts/fix_code.py
 ```
 
-By default it reads the `.cpp` for selected queries from `SKETCH_DIR`, writes successful fixes to `SKETCH_FIX_DIR`, and may append rows to `fix_agent_iterations.csv`.
 
 ### 3. Hint-guided performance optimization
 
@@ -103,14 +98,9 @@ Expects sources already present under `SKETCH_FIX_DIR`; streams the optimization
 - **HITS-style**: Queries come from `benchmark/hits_queries.sql` and are loaded by `benchmark/click_benchmark.py`.
 - **SSB**: See `benchmark/ssb_benchmark.py`.
 
-When switching benchmarks, update `BENCHMARK`, `DB_JSON`, and related paths in `config.py` together.
+When switching benchmarks, update `BENCHMARK`, `GENERATED_CODE_DIR`and related paths in `config.py` together.
 
 ## Notes
 
 - Paths in `config.py` (local DuckDB files, Docker volume mounts) are machine-specific; re-check them when moving to another host.
-- Some modules (e.g. `dbweaver/sketch/plan.py`) assume imports relative to runtime `PYTHONPATH`; if you see `ModuleNotFoundError`, run from the project root or adjust `sys.path`.
 - Generation and optimization call external APIs and may keep Docker / CPU busy for a long time; they are best suited to experimental environments.
-
-## License
-
-If you publish this project publicly, add a `LICENSE` file and update this section accordingly.

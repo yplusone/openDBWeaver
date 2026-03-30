@@ -37,9 +37,12 @@ client = httpx.Client(
 
 
 EXPT_LLM_MODEL = "gpt-4o-mini"
+OPTIMIZE_LLM_MODEL = "gpt-5"
+CODEGEN_LLM_MODEL = "gemini-3-flash-preview"
 API_KEY = os.environ.get("DBWEAVER_API_KEY", "")
 BASE_URL = os.environ.get("DBWEAVER_BASE_URL", "https://api.openai.com/v1")
-
+CODEGEN_API_KEY = API_KEY
+CODEGEN_BASE_URL = BASE_URL
 
 # Validation flags
 VALIDATION_FLAG_COMPILE_FAIL = "COMPILE_FAIL"
@@ -47,18 +50,6 @@ VALIDATION_FLAG_RESULT_MISMATCH = "RESULT_MISMATCH"
 VALIDATION_FLAG_PERF_NEED_OPT = "PERF_NEED_OPT"
 
 
-CODEGEN_LLM_MODEL = "gemini-3-flash-preview"
-CODEGEN_API_KEY = os.environ.get("DBWEAVER_CODEGEN_API_KEY", os.environ.get("DBWEAVER_API_KEY", ""))
-CODEGEN_BASE_URL = os.environ.get(
-    "DBWEAVER_CODEGEN_BASE_URL",
-    os.environ.get("DBWEAVER_BASE_URL", "https://api.openai.com/v1"),
-)
 
-OPTIMIZE_LLM_MODEL = "gpt-5"
-OPTIMIZE_API_KEY = os.environ.get("DBWEAVER_OPTIMIZE_API_KEY", os.environ.get("DBWEAVER_API_KEY", ""))
-OPTIMIZE_BASE_URL = os.environ.get(
-    "DBWEAVER_OPTIMIZE_BASE_URL",
-    os.environ.get("DBWEAVER_BASE_URL", "https://api.openai.com/v1"),
-)
 
 TEMPLATE_PATH = "template/one_input_parralel.cpp"
