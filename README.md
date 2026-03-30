@@ -40,9 +40,15 @@ docker run --rm   \
     bash -lc 'rm -rf /app/build/release && make release'
 ```
 
-## Database Download
+## Benchmarks and workloads
+
+
 For ClickBench, Follow the instruction in https://github.com/ClickHouse/ClickBench
+
 For SSB, Follow the instruction in https://clickhouse.com/docs/getting-started/example-datasets/star-schema
+
+When switching benchmarks, update `BENCHMARK`, `GENERATED_CODE_DIR`and related paths in `config.py` together.
+
 
 ## Installing dependencies
 
@@ -93,12 +99,6 @@ python scripts/hint_guided_code_optimization.py
 
 Expects sources already present under `SKETCH_FIX_DIR`; streams the optimization graph and writes tree-search traces under `TRACE_DIR`.
 
-## Benchmarks and workloads
-
-- **HITS-style**: Queries come from `benchmark/hits_queries.sql` and are loaded by `benchmark/click_benchmark.py`.
-- **SSB**: See `benchmark/ssb_benchmark.py`.
-
-When switching benchmarks, update `BENCHMARK`, `GENERATED_CODE_DIR`and related paths in `config.py` together.
 
 ## Notes
 
