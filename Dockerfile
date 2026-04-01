@@ -1,11 +1,11 @@
 FROM ubuntu:22.04
 
-# ---------- 只给 git 用的代理参数（build 时传进来） ----------
+# ---------- Proxy settings for git only (passed in at build time) ----------
 ARG GIT_HTTP_PROXY
 ARG GIT_HTTPS_PROXY
 
 # ------------------------------------------------------------
-# 安装必要的构建工具和依赖（这里显式关闭所有代理）
+# Install build tooling and dependencies (unset all proxies explicitly here)
 # ------------------------------------------------------------
 RUN unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY && \
     apt-get update && \
@@ -25,7 +25,7 @@ RUN unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY && \
     apt-get clean
 
 # ------------------------------------------------------------
-# 安装 vcpkg（微软 C/C++ 包管理器）—— 这里只给 git 配代理
+# Install vcpkg (Microsoft C/C++ package manager) — proxy applies to git only
 # ------------------------------------------------------------
 RUN git -c http.proxy="${GIT_HTTP_PROXY}" \
         -c https.proxy="${GIT_HTTPS_PROXY}" \
@@ -33,7 +33,7 @@ RUN git -c http.proxy="${GIT_HTTP_PROXY}" \
     /opt/vcpkg/bootstrap-vcpkg.sh
 
 # ------------------------------------------------------------
-# 设置工作目录
+# Working directory
 # ------------------------------------------------------------
 WORKDIR /app
 

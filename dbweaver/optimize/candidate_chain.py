@@ -28,57 +28,6 @@ DEFAULT_OPTIMIZATION_HINTS = [
         "title": "Reduce unnecessary memcpy or string construction",
         "description": "Avoid unnecessary memcpy or string construction in the hot path. For example, if there is a string concatenation in the hot path, you can avoid it by using pointer instead of copy value."
     }
-    # {
-    #     "id": "change_comparison",
-    #     "title": "change comparison to avoid expensive functions",
-    #     "description": "For date filters like year == :year, replace ExtractYear() calls with direct date_t comparisons using days_from_civil. Precompute boundary dates in FnInit."
-    # },
-    # {
-    #     "id": "cache_efficiency",
-    #     "title": "optimize cache efficiency",
-    #     "description": "Illiminate unnecessary data conversion and memory allocation in the hot path."
-    # },
-    # {
-    #     "id":"merge_expression",
-    #     "title":"merge expressions shared common sub-expressions",
-    #     "description":"Merge expressions shared common sub-expressions to avoid redundant computation. Especially aggregate functions may share part of the computation, you can merge them to avoid redundant computation. For example, if there are two aggregate functions like sum(x) and sum(x+1), you can merge them to sum(x) + sum(1)."
-    # },
-    # {
-    #     "id":"replace_unordered_map",
-    #     "title":"replace unordered map with flat_hash_set or customized hash table",
-    #     "description":"unordered map is not very efficient, you can replace it with flat_hash_set or customized hash table to improve performance."
-    # },
-    # {
-    #     "id": "vector_collect_sort_unique",
-    #     "title": "Collect into vector then sort+unique (batch distinct)",
-    #     "description": "Avoid per-row unordered_set insert. In FnExecute, push UserID into a contiguous std::vector<int64_t>. In FnFinalize, sort+unique locally, then merge local-unique results and do one final sort+unique. Usually the biggest win for COUNT(DISTINCT) and very cache-friendly."
-    # },
-    # {
-    #     "id": "reserve_amortization",
-    #     "title": "Pre-reserve containers to avoid rehash/realloc",
-    #     "description": "Do vals.reserve(vals.size() + input.size()) per chunk for vector accumulation. If using hash structures, reserve based on expected volume or rehash thresholds. This removes a lot of hidden overhead in hot path."
-    # },
-    # {
-    #     "id": "finalize_last_thread_only_work",
-    #     "title": "Ensure expensive finalization happens exactly once",
-    #     "description": "Gate the final global consolidation (global sort+unique or final aggregation) so only the last local state performs it. Other threads should return an empty output chunk quickly."
-    # },
-    # {
-    #     "id": "sharded_global_merge",
-    #     "title": "Shard global merge to reduce lock contention (when global needs locking)",
-    #     "description": "If you still maintain a global set/map or global append becomes a bottleneck, shard the global state into N partitions each with its own lock. Route by hash(UserID). This improves scalability when threads>1."
-    # },
-    # {
-    # "id": "radix_partitioned_hash_distinct",
-    # "title": "Use RadixPartitionedHashTable for DISTINCT deduplication",
-    # "description": (
-    #     "For COUNT(DISTINCT) / dedup, replace a single global unordered_set with a radix-partitioned hash structure "
-    #     "(DuckDB-style RadixPartitionedHashTable). Radix-partition keys (e.g., by high bits of hash(UserID)) into N "
-    #     "partitions, build/merge per-partition hash tables to improve cache locality, reduce lock contention, and "
-    #     "enable parallel finalize (partition-wise). This typically outperforms std::unordered_set on large distinct sets."
-    # )
-    # }
-
 ]
 
 

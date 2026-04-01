@@ -11,8 +11,6 @@ DUCKDB_BINARY_PATH = os.environ.get("DUCKDB_BINARY_PATH", "/path/to/duckdb/exten
 DEFAULT_SOURCE_DIR = os.environ.get("DEFAULT_SOURCE_DIR", "/path/to/duckdb/extension-template/")
 DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "dbweaver_duckdb:latest")
 
-DB_JSON = f"benchmark/profiles/{BENCHMARK}_database.json"
-
 GENERATED_CODE_DIR = f"output/{BENCHMARK}/gemini_3_flash"
 SKETCH_DIR = f"{GENERATED_CODE_DIR}/sketch"
 SKETCH_FIX_DIR = f"{GENERATED_CODE_DIR}/sketch_fix"
@@ -31,7 +29,7 @@ client = httpx.Client(
         read=300.0,
         write=30.0,
         pool=5.0,
-    ),  # thinking 模型需要更长超时
+    ), 
     proxy=_proxy or None,
 )
 
@@ -48,8 +46,6 @@ CODEGEN_BASE_URL = BASE_URL
 VALIDATION_FLAG_COMPILE_FAIL = "COMPILE_FAIL"
 VALIDATION_FLAG_RESULT_MISMATCH = "RESULT_MISMATCH"
 VALIDATION_FLAG_PERF_NEED_OPT = "PERF_NEED_OPT"
-
-
 
 
 TEMPLATE_PATH = "template/one_input_parralel.cpp"

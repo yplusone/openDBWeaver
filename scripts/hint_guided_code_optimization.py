@@ -1,7 +1,4 @@
 import os
-
-# --- 2. 导入图 ---
-
 import sys
 import datetime
 import time
@@ -19,11 +16,11 @@ from dbweaver.utils.parse_query import parse_query_from_file
 
 def gather_context_node(state):
     """
-    收集数据库 schema、表字段信息、已存在的 helper 函数或其它业务配置，
-    并存入 state.context，供 generate_template / generate 使用。
+    Collect database schema, column metadata, existing helper functions, or other
+    business configuration, and store them in state["ctx"] for generate_template /
+    generate.
     """
     gather_context = GatherContext()
-    # 1. 读取数据库元数据举例
     print(f"[{datetime.datetime.now():%Y-%m-%d %H:%M:%S}] Begin to gather context\n")
 
     state["ctx"]['columns'] =  gather_context.gather_columns_context(state)
@@ -33,8 +30,8 @@ def gather_context_node(state):
     return state
 
 if __name__ == "__main__":
-    # --- 3. 执行代码优化 ---
-    # 提供 C++ 代码和对应 SQL 上下文（用于结果校验与性能评估）
+    # --- 3. Run code optimization ---
+    # Supply C++ and matching SQL context (for correctness checks and performance)
 
     checker = CodeChecker()
     if not os.path.isfile(DUCKDB_BINARY_PATH+"release/duckdb"):

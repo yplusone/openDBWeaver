@@ -24,7 +24,7 @@ def sketch_construction(query_id):
         print(f"Generating sketch for query {query_id}")
         app = sketch_generation_subgraph.build()
 
-        # ✅ 正确初始化 GraphState
+        # Correctly initialize GraphState
         initial_state = {
             "query_id":query_id,
             "plan": None,  

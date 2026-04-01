@@ -29,43 +29,6 @@ def _normalize_to_0_1(x: float, history: List[float]) -> float:
     y = (x - lo) / (hi - lo)
     return _clamp(y, 0.0, 1.0)
 
-def score_0_100(
-    processing_time: float,
-    root_processing_time: float,
-    best_candidate_processing_time: float,
-    score_stats: Dict
-) -> int:
-    """
-    Returns an integer score in [0, 100].
-    score_stats is a mutable dict maintained per query, e.g. state["score_stats"].
-    """
-    if processing_time <= 0 or root_processing_time <= 0 or best_candidate_processing_time <= 0:
-        return 0
-
-    # Relative improvement vs current best (parent/best)
-    rel = best_candidate_processing_time / processing_time
-    # Absolute improvement vs root baseline
-    abs_ = root_processing_time / processing_time
-
-    # Log-space for symmetry: 1.0 -> 0, >1 -> positive, <1 -> negative
-    log_rel = math.log(rel)
-    log_abs = math.log(abs_)
-
-    # Update history
-    score_stats.setdefault("log_rel_hist", []).append(log_rel)
-    score_stats.setdefault("log_abs_hist", []).append(log_abs)
-
-    # Normalize each to [0,1] using robust quantile bounds
-    rel_n = _normalize_to_0_1(log_rel, score_stats["log_rel_hist"])
-    abs_n = _normalize_to_0_1(log_abs, score_stats["log_abs_hist"])
-
-    # Weighted score: prioritize 'getting better than parent' for search guidance
-    w_rel = 0.7
-    w_abs = 0.3
-    s = w_rel * rel_n + w_abs * abs_n
-
-    # Map to 0..100
-    return int(round(100 * s)+1)
 
 def create_reflection_from_candidate(state, candidate, root_processing_time, best_candidate_processing_time):
     from state import Reflection
@@ -77,33 +40,22 @@ def create_reflection_from_candidate(state, candidate, root_processing_time, bes
         processing_time = float(perf.get("processing_time", 0.0) or 0.0)
         total_time = float(perf.get("total_time", 0.0) or 0.0)
 
-        if processing_time >= 0:
-            speedup_root = (root_processing_time - processing_time) / root_processing_time
-        else:
-            speedup_root = 0.0
 
-        if speedup_root < 0:
-            score = 50+speedup_root*100/2.0
-        else:
-            score = 50+speedup_root*100/2.0
+        speedup_root = (root_processing_time - processing_time) / root_processing_time
+
+        if speedup_root < -1:
+            speedup_root = -1
+        if speedup_root > 1:
+            speedup_root = 1
+
+        score = 50+speedup_root*100/2.0
+
 
         if best_candidate_processing_time > 0 and processing_time > 0:
             speedup_parent = best_candidate_processing_time / processing_time
         else:
             speedup_parent = 0.0
 
-        # # Per-query stats (attach to candidate or carry in your global state)
-        # score_stats = state["processing_time_history"]
-
-        # score = score_0_100(
-        #     processing_time=processing_time,
-        #     root_processing_time=root_processing_time,
-        #     best_candidate_processing_time=best_candidate_processing_time,
-        #     score_stats=score_stats
-        # )
-
-        # found_solution: 不建议固定 >=5x
-        # 给你一个更稳的默认：相对 root 达到显著提升 or 相对 parent 有明显提升
         found_solution = (speedup_root >= 0.9)
         score = int(score) if score > 1 else 1
 
