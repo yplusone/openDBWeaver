@@ -37,18 +37,20 @@ if __name__ == "__main__":
     if not os.path.isfile(DUCKDB_BINARY_PATH+"release/duckdb"):
         checker.refresh_code()
     if BENCHMARK == "ssb":
-        query_templates = SSBQueryTemplates()
+        query_benchmark = SSBQueryTemplates()
     elif BENCHMARK == "hits":
-        query_templates = ClickBenchmarkQueries()
-    for query_id in range(16,44):
+        query_benchmark = ClickBenchmarkQueries()
+    for query_id in range(3,4):
         if BENCHMARK == "hits" and query_id in [1,2,20,21,24,25,39,41,42]: 
             continue
         try:
+            query_template = query_benchmark.get_template(query_id)
+            query_example = query_benchmark.get_query(query_id, -1)
+            split_query, split_template = query_benchmark.get_split_query(query_id)
             src_path = f"{SKETCH_FIX_DIR}/{BENCHMARK}_q_{query_id}.cpp"
             if not os.path.isfile(src_path):
                 continue
-            query_example, query_template, split_query, split_template = parse_query_from_file(f"{SKETCH_DIR}/{BENCHMARK}_q_{query_id}.cpp")
-        
+
             with open(src_path, "r") as f:
                 cpp_code = f.read()
                           

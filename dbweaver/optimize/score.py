@@ -1,6 +1,7 @@
 import math
 from typing import Dict, List, Tuple
 import numpy as np
+from dbweaver.optimize.state import Reflection
 
 def _clamp(x: float, lo: float, hi: float) -> float:
     return lo if x < lo else hi if x > hi else x
@@ -31,8 +32,7 @@ def _normalize_to_0_1(x: float, history: List[float]) -> float:
 
 
 def create_reflection_from_candidate(state, candidate, root_processing_time, best_candidate_processing_time):
-    from state import Reflection
-
+    
     candidate["parent_processing_time"] = best_candidate_processing_time
 
     if candidate.get("success") and candidate.get("optimized_code"):

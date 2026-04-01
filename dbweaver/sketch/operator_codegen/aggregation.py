@@ -1,7 +1,6 @@
 # aggregation.py
 # coding: utf-8
 from .operator_gen import BaseOperator, register_operator, CodegenContext
-from config import DB_JSON
 
 
 @register_operator("agg")
