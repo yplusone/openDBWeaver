@@ -1,9 +1,3 @@
-"""
-fix_agent.py
-------------
-一个自动修复 C++ 代码的代理，循环调用 LLM 来解决问题，直到运行成功并且执行结果匹配。
-"""
-
 from __future__ import annotations
 
 from typing import Any, Optional, Tuple
@@ -20,9 +14,6 @@ from config import (
     VALIDATION_FLAG_COMPILE_FAIL,
     VALIDATION_FLAG_RESULT_MISMATCH,
     VALIDATION_FLAG_PERF_NEED_OPT,
-    BENCHMARK,
-    SKETCH_DIR,
-    SKETCH_FIX_DIR,
 )
 from dbweaver.sketch.code_combine import CodeOutput
 from dbweaver.utils.apply_replacement import apply_replacements_from_list

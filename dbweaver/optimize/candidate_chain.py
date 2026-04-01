@@ -234,7 +234,6 @@ def generate_and_optimize_candidates(
     max_iterations_per_hint: int = 10,
 ) -> List[Dict[str, Any]]:
     """
-    完整流程：生成优化方向 -> 调用 optimize_agent -> 运行代码 -> 记录效果
     
     Args:
         state: State dictionary containing cpp_code, query info, etc.
